@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function ownsUserData(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if ownsUserData(uid);
+      allow create: if ownsUserData(uid)
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if ownsUserData(uid)
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['displayName', 'email', 'study', 'campus', 'goal', 'updatedAt']);
+      allow delete: if false;
+
+      match /appData/{docId} {
+        allow read: if ownsUserData(uid);
+        allow create, update: if ownsUserData(uid) && docId == 'settings'
+          && request.resource.data.startingBalance is number
+          && request.resource.data.startingBalance >= 0
+          && request.resource.data.budget is number
+          && request.resource.data.budget >= 0
+          && request.resource.data.periodStart is string
+          && request.resource.data.nextAllowance is string;
+        allow delete: if false;
+      }
+
+      match /transactions/{transactionId} {
+        allow read: if ownsUserData(uid);
+        allow create, update: if ownsUserData(uid)
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.type in ['income', 'expense']
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+          && request.resource.data.category is string
+          && request.resource.data.date is string
+          && request.resource.data.note is string;
+        allow delete: if ownsUserData(uid);
+      }
+    }
+
+    // All collections not explicitly allowed above are denied.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

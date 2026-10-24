@@ -1,0 +1,17 @@
+CATETIN Launch Pack — Firebase + Vercel edition
+
+Updates:
+- Project identity and docs describe CATETIN — Catat Uangnya, Kendalikan Maunya.
+- Integrated Firebase Authentication email/password registration and login into site/index.html.
+- Integrated Cloud Firestore profile, financial settings, and per-transaction documents.
+- Added Firestore realtime listeners to synchronize account data between signed-in devices.
+- Added explicit Firebase configuration validation; placeholders must be replaced before auth works.
+- Updated site/firebase-config.js to expose the config object expected by the page.
+- Updated firestore.rules for user-scoped profile, app settings, and transaction data.
+- README_SETUP.md now documents Firebase setup, rules, Vercel deployment, and multi-device testing.
+- Retained site/vercel.json and site/_headers.
+
+Important:
+- The Firebase project/configuration and deployment have not been created or tested on the user's account.
+- Replace placeholders, enable Email/Password Authentication, create Firestore, publish rules, and test with separate accounts before real use.
+- Firebase Web config is not an admin secret; never expose service-account private keys in frontend code.
